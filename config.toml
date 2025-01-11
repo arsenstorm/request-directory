@@ -16,7 +16,7 @@ enabled = true
 type = "external"
 enabled = true
 
-[api.youtube_dl]
+[api.youtube-dl]
 type = "external"
 enabled = true
 
