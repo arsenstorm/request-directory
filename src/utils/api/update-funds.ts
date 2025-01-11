@@ -12,17 +12,22 @@ export async function updateFunds(
 
 	const precision = 10;
 
-	const safeActual = actual !== null
-		? Number.parseFloat(actual.toFixed(precision))
-		: 0;
+	const safeActual =
+		actual !== null ? Number.parseFloat(actual.toFixed(precision)) : 0;
 	const safeEstimated = Number.parseFloat(estimated.toFixed(precision));
 
-	const amountToChange = safeActual + safeEstimated;
+	let amountToChange = safeEstimated;
+	if (type === "add") {
+		amountToChange = safeActual;
+	} else if (safeActual !== null) {
+		amountToChange = safeActual - safeEstimated;
+	}
 
 	const newAmount = Number.parseFloat(
 		(type === "add"
 			? userData.funds + amountToChange
-			: userData.funds - amountToChange).toFixed(precision),
+			: userData.funds - amountToChange
+		).toFixed(precision),
 	);
 
 	// update user funds
