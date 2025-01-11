@@ -51,7 +51,7 @@ else
     echo "Running docker-compose up with cache"
 fi
 
-docker-compose up --build --force-recreate -d
+docker-compose up --build --force-recreate -d --remove-orphans
 
 # Wait for containers to be ready (adjust sleep time if needed)
 echo "Waiting for containers to be ready..."
