@@ -275,6 +275,26 @@ external_api_images = {
         },
         'restart': 'unless-stopped',
     },
+    'youtube_dl': {
+        'image': 'ghcr.io/arsenstorm/youtube-dl:latest',
+        'ports': ['7005:7005'],
+        'environment': {
+            'R2_ENDPOINT': '${R2_ENDPOINT}',
+            'R2_PUBLIC_URL': '${R2_PUBLIC_URL}',
+            'R2_ACCESS_KEY': '${R2_ACCESS_KEY}',
+            'R2_SECRET_KEY': '${R2_SECRET_KEY}',
+            'R2_BUCKET_NAME': '${R2_BUCKET_NAME}',
+        },
+        'deploy': {
+            'replicas': 1,
+            'resources': {
+                'limits': {
+                    'memory': '512M',
+                },
+            },
+        },
+        'restart': 'unless-stopped',
+    },
     # Add other external APIs here
 }
 
@@ -288,6 +308,9 @@ external_api_environment_variables = {
     },
     'ageandgender': {
         'AGEANDGENDER_URL': 'http://ageandgender:7003/infer'
+    },
+    'youtube_dl': {
+        'YOUTUBE_DL_URL': 'http://youtube_dl:7005/download'
     }
 }
 
