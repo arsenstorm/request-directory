@@ -31,6 +31,8 @@ export function getTagColor(tag: string): TagColor {
 			return "cyan";
 		case "Audio":
 			return "lime";
+		case "Video":
+			return "red";
 		case "Coming Soon":
 			return "fuchsia";
 		default:
