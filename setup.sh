@@ -275,7 +275,7 @@ external_api_images = {
         },
         'restart': 'unless-stopped',
     },
-    'youtube_dl': {
+    'youtube-dl': {
         'image': 'ghcr.io/arsenstorm/youtube-dl:latest',
         'ports': ['7005:7005'],
         'environment': {
@@ -309,8 +309,8 @@ external_api_environment_variables = {
     'ageandgender': {
         'AGEANDGENDER_URL': 'http://ageandgender:7003/infer'
     },
-    'youtube_dl': {
-        'YOUTUBE_DL_URL': 'http://youtube_dl:7005/download'
+    'youtube-dl': {
+        'YOUTUBE_DL_URL': 'http://youtube-dl:7005/download'
     }
 }
 
