@@ -25,7 +25,7 @@ export const youtubeDlConfig = {
 	],
 	outputs: [
 		{
-			id: "video",
+			id: "download_url",
 			type: "video",
 			name: "Video",
 			description: "The video downloaded from the YouTube URL.",

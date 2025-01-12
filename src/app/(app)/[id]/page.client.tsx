@@ -50,7 +50,7 @@ export interface InputType {
 
 export interface OutputType {
 	id: string;
-	type: "image";
+	type: "image" | "video";
 	name?: string;
 	blur?: boolean;
 	description?: string;
@@ -340,6 +340,45 @@ export function Output({
 											className={clsx(
 												"flex items-center justify-center min-h-24",
 												output?.[id] ? "hidden" : "",
+											)}
+										>
+											<Text>Output Preview</Text>
+										</div>
+									</div>
+								</Field>
+							);
+						}
+
+						if (type === "video") {
+							return (
+								<Field key={id}>
+									<Label>
+										{configOutput.name}{" "}
+										<Code className="ml-2">{configOutput.id}</Code>
+									</Label>
+									{configOutput.description && (
+										<Description>{configOutput.description}</Description>
+									)}
+
+									<div className="p-2 rounded-lg border bg-white my-2">
+										<video
+											src={output?.[id]}
+											className={clsx(
+												"object-contain w-full h-96 rounded-md",
+												output?.[id]
+													? ""
+													: "hidden",
+											)}
+											controls
+										>
+											<track kind="captions" src="" label="Captions" />
+										</video>
+										<div
+											className={clsx(
+												"flex items-center justify-center min-h-24",
+												output?.[id]
+													? "hidden"
+													: "",
 											)}
 										>
 											<Text>Output Preview</Text>
