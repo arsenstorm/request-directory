@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
 		await updateFunds(userData, actual, 0);
 
 		const response = {
-			result: data,
+			...data,
 			success: true,
 			funds: {
 				remaining: userData ? userData.funds - actual : null,

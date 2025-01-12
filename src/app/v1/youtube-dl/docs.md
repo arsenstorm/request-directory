@@ -24,17 +24,15 @@ Sample response:
 
 ```json
 {
-  "result": {
-    "video_id": "dQw4w9WgXcQ",
-    "thumbnails": {
-      "max": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-      "high": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-      "medium": "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
-      "standard": "https://i.ytimg.com/vi/dQw4w9WgXcQ/sddefault.jpg",
-      "default": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg"
-    },
-    "download_url": "https://cdn.request.directory/..."
+  "video_id": "dQw4w9WgXcQ",
+  "thumbnails": {
+    "max": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+    "high": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+    "medium": "https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+    "standard": "https://i.ytimg.com/vi/dQw4w9WgXcQ/sddefault.jpg",
+    "default": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg"
   },
+  "download_url": "https://cdn.request.directory/...",
   "success": true
 }
 ```
