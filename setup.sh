@@ -285,6 +285,7 @@ external_api_images = {
             'R2_SECRET_KEY': '${R2_SECRET_KEY}',
             'R2_BUCKET_NAME': '${R2_BUCKET_NAME}',
         },
+        'volumes': [] if not os.path.exists('./cookies.txt') else ['./cookies.txt:/app/cookies.txt'],
         'deploy': {
             'replicas': 1,
             'resources': {
@@ -359,6 +360,8 @@ for api_name, api_value in api_configs.items():
                 service_config['restart'] = external_api['restart']
             if 'environment' in external_api:
                 service_config['environment'] = external_api['environment']
+            if 'volumes' in external_api:
+                service_config['volumes'] = external_api['volumes']
 
             docker_compose['services'][service_name] = service_config
             docker_compose['services']['request-directory']['depends_on'].append(
