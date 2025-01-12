@@ -357,6 +357,8 @@ for api_name, api_value in api_configs.items():
                 service_config['deploy'] = external_api['deploy']
             if 'restart' in external_api:
                 service_config['restart'] = external_api['restart']
+            if 'environment' in external_api:
+                service_config['environment'] = external_api['environment']
 
             docker_compose['services'][service_name] = service_config
             docker_compose['services']['request-directory']['depends_on'].append(
