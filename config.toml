@@ -20,5 +20,9 @@ enabled = true
 type = "external"
 enabled = true
 
+[api.tiktok-dl]
+type = "external"
+enabled = true
+
 [api.create-video] # this is an internal API (i.e. It runs on the NextJS app)
 enabled = false

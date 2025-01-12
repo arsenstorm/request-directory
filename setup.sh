@@ -285,7 +285,28 @@ external_api_images = {
             'R2_SECRET_KEY': '${R2_SECRET_KEY}',
             'R2_BUCKET_NAME': '${R2_BUCKET_NAME}',
         },
-        'volumes': [] if not os.path.exists('./cookies.txt') else ['./cookies.txt:/app/cookies.txt'],
+        'volumes': [] if not os.path.exists('./youtube-cookies.txt') else ['./youtube-cookies.txt:/app/youtube-cookies.txt'],
+        'deploy': {
+            'replicas': 1,
+            'resources': {
+                'limits': {
+                    'memory': '512M',
+                },
+            },
+        },
+        'restart': 'unless-stopped',
+    },
+    'tiktok-dl': {
+        'image': 'ghcr.io/arsenstorm/tiktok-dl:latest',
+        'ports': ['7006:7006'],
+        'environment': {
+            'R2_ENDPOINT': '${R2_ENDPOINT}',
+            'R2_PUBLIC_URL': '${R2_PUBLIC_URL}',
+            'R2_ACCESS_KEY': '${R2_ACCESS_KEY}',
+            'R2_SECRET_KEY': '${R2_SECRET_KEY}',
+            'R2_BUCKET_NAME': '${R2_BUCKET_NAME}',
+        },
+        'volumes': [] if not os.path.exists('./tiktok-cookies.txt') else ['./tiktok-cookies.txt:/app/tiktok-cookies.txt'],
         'deploy': {
             'replicas': 1,
             'resources': {
@@ -312,6 +333,9 @@ external_api_environment_variables = {
     },
     'youtube-dl': {
         'YOUTUBE_DL_URL': 'http://youtube-dl:7005/download'
+    },
+    'tiktok-dl': {
+        'TIKTOK_DL_URL': 'http://tiktok-dl:7006/download'
     }
 }
 
