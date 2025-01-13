@@ -285,7 +285,7 @@ external_api_images = {
             'R2_SECRET_KEY': '${R2_SECRET_KEY}',
             'R2_BUCKET_NAME': '${R2_BUCKET_NAME}',
         },
-        'volumes': [] if not os.path.exists('./youtube-cookies.txt') else ['./youtube-cookies.txt:/app/youtube-cookies.txt'],
+        'volumes': [] if not os.path.exists('./youtube-cookies.txt') else ['./youtube-cookies.txt:/app/cookies.txt'],
         'deploy': {
             'replicas': 1,
             'resources': {
@@ -306,7 +306,7 @@ external_api_images = {
             'R2_SECRET_KEY': '${R2_SECRET_KEY}',
             'R2_BUCKET_NAME': '${R2_BUCKET_NAME}',
         },
-        'volumes': [] if not os.path.exists('./tiktok-cookies.txt') else ['./tiktok-cookies.txt:/app/tiktok-cookies.txt'],
+        'volumes': [] if not os.path.exists('./tiktok-cookies.txt') else ['./tiktok-cookies.txt:/app/cookies.txt'],
         'deploy': {
             'replicas': 1,
             'resources': {
