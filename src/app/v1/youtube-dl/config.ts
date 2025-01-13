@@ -7,8 +7,8 @@ export const youtubeDlConfig = {
 		tag: "Video",
 	},
 	pricing: {
-		estimated: 0.0001, // roughly $0.0001 per video downloaded
-		price: 0.0001,
+		estimated: 0.005, // roughly $0.005 per video downloaded
+		price: 0.005,
 	},
 	request: {
 		method: "POST",
