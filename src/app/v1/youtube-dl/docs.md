@@ -25,6 +25,9 @@ Sample response:
 ```json
 {
   "video_id": "dQw4w9WgXcQ",
+  "video_url": "https://cdn.request.directory/...",
+  "metadata_url": "https://cdn.request.directory/youtube/dQw4w9WgXcQ_metadata.txt",
+  "subtitles_url": "https://cdn.request.directory/youtube/dQw4w9WgXcQ_subtitles.txt",
   "thumbnails": {
     "max": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
     "high": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
@@ -32,7 +35,6 @@ Sample response:
     "standard": "https://i.ytimg.com/vi/dQw4w9WgXcQ/sddefault.jpg",
     "default": "https://i.ytimg.com/vi/dQw4w9WgXcQ/default.jpg"
   },
-  "download_url": "https://cdn.request.directory/...",
   "success": true
 }
 ```
