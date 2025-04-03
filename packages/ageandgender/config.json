@@ -19,6 +19,19 @@
 						"required": true
 					}
 				}
+			},
+			"output": {
+				"type": "json",
+				"parameters": {
+					"faces": {
+						"type": "array",
+						"required": true
+					},
+					"image": {
+						"type": "string",
+						"required": true
+					}
+				}
 			}
 		}
 	}

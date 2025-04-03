@@ -80,7 +80,7 @@ async function buildAndRun() {
 
 		// Build Docker image
 		console.log("\nBuilding Docker image...");
-		const buildCommand = `cd packages/${packageName} && docker build -t ${config.name} .`;
+		const buildCommand = `cd packages/${packageName} && docker build -t ${config.slug} .`;
 		const { stdout: buildOutput } = await execAsync(buildCommand);
 		console.log(buildOutput);
 
@@ -94,7 +94,7 @@ async function buildAndRun() {
 
 		// Run Docker container with env vars
 		console.log("\nRunning Docker container...");
-		const runCommand = `docker run --rm -p ${port}:${port} ${envString} ${config.name}`;
+		const runCommand = `docker run --rm -p ${port}:${port} ${envString} ${config.slug}`;
 
 		// This won't return until the container is stopped
 		console.log(`Executing: ${runCommand}`);

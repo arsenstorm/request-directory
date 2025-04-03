@@ -50,7 +50,9 @@
 												"type": "string",
 												"enum": ["string", "number", "boolean", "file"]
 											},
-											"required": { "type": "boolean" }
+											"required": { "type": "boolean" },
+											"name": { "type": "string" },
+											"description": { "type": "string" }
 										}
 									}
 								}
@@ -61,7 +63,20 @@
 							"required": ["type", "parameters"],
 							"properties": {
 								"type": { "type": "string", "enum": ["json", "formdata"] },
-								"parameters": { "type": "object" }
+								"parameters": { 
+									"type": "object",
+									"additionalProperties": {
+										"type": "object",
+										"properties": {
+											"type": {
+												"type": "string",
+												"enum": ["string", "number", "boolean", "object", "array"]
+											},
+											"name": { "type": "string" },
+											"description": { "type": "string" }
+										}
+									}
+								}
 							}
 						}
 					}
