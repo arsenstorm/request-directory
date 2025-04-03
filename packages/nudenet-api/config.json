@@ -1,4 +1,23 @@
 {
+	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
 	"name": "nudenet-api",
-	"port": 7001
+	"port": 7001,
+	"pricing": {
+		"type": "fixed",
+		"price": 0.01
+	},
+	"tag": "Moderation",
+	"api": {
+		"@post/infer": {
+			"input": {
+				"type": "formdata",
+				"parameters": {
+					"image": {
+						"type": "file",
+						"required": true
+					}
+				}
+			}
+		}
+	}
 }

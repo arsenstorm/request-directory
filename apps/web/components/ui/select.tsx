@@ -8,11 +8,13 @@ export const Select = function Select({
 	className,
 	multiple,
 	...props
-}: Readonly<{
-	ref?: React.Ref<HTMLSelectElement>;
-	className?: string;
-	multiple?: boolean;
-} & Omit<Headless.SelectProps, "as" | "className">>) {
+}: Readonly<
+	{
+		ref?: React.Ref<HTMLSelectElement>;
+		className?: string;
+		multiple?: boolean;
+	} & Omit<Headless.SelectProps, "as" | "className">
+>) {
 	return (
 		<span
 			data-slot="control"

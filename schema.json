@@ -1,0 +1,62 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "object",
+	"required": ["name", "port", "pricing", "tag", "api"],
+	"properties": {
+		"$schema": { "type": "string" },
+		"name": { "type": "string" },
+		"port": { "type": "integer" },
+		"pricing": {
+			"type": "object",
+			"required": ["type", "price"],
+			"properties": {
+				"type": { "type": "string", "enum": ["fixed"] },
+				"price": { "type": "number" }
+			}
+		},
+		"tag": {
+			"type": "string",
+			"enum": [
+				"Moderation",
+				"Generative",
+				"Utility",
+				"Vision",
+				"Audio",
+				"Video",
+				"Coming Soon"
+			]
+		},
+		"api": {
+			"type": "object",
+			"patternProperties": {
+				"^@(get|post|put|delete)/[a-zA-Z0-9_/-]+$": {
+					"type": "object",
+					"required": ["input"],
+					"properties": {
+						"input": {
+							"type": "object",
+							"required": ["type", "parameters"],
+							"properties": {
+								"type": { "type": "string", "enum": ["json", "formdata"] },
+								"parameters": {
+									"type": "object",
+									"additionalProperties": {
+										"type": "object",
+										"required": ["type", "required"],
+										"properties": {
+											"type": {
+												"type": "string",
+												"enum": ["string", "number", "boolean", "file"]
+											},
+											"required": { "type": "boolean" }
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

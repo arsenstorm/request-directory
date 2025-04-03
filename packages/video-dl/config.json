@@ -1,4 +1,38 @@
 {
+	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
 	"name": "video-dl",
-	"port": 7005
+	"port": 7005,
+	"pricing": {
+		"type": "fixed",
+		"price": 0.01
+	},
+	"tag": "Video",
+	"api": {
+		"@post/download": {
+			"input": {
+				"type": "json",
+				"parameters": {
+					"url": {
+						"type": "string",
+						"required": true
+					},
+					"format": {
+						"type": "string",
+						"required": true
+					}
+				}
+			}
+		},
+		"@post/list": {
+			"input": {
+				"type": "json",
+				"parameters": {
+					"url": {
+						"type": "string",
+						"required": true
+					}
+				}
+			}
+		}
+	}
 }
