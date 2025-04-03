@@ -12,7 +12,7 @@ export async function GET(request: NextRequest, {
 
   const configFiles = await getConfig();
 
-  const config = configFiles.find((config) => config.name === id);
+  const config = configFiles.find((config) => config.slug === id);
 
   if (!config) {
     return NextResponse.json({

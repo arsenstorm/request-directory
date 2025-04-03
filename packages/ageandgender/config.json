@@ -1,6 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
-	"name": "ageandgender",
+	"name": "Age and Gender",
+	"slug": "ageandgender",
 	"port": 7003,
 	"pricing": {
 		"type": "fixed",

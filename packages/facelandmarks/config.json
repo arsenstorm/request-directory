@@ -1,6 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
-	"name": "facelandmarks",
+	"name": "Face Landmarks",
+	"slug": "facelandmarks",
 	"port": 7002,
 	"pricing": {
 		"type": "fixed",

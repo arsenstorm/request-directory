@@ -1,6 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
-	"name": "video-dl",
+	"name": "Video Downloader",
+	"slug": "video-dl",
 	"port": 7005,
 	"pricing": {
 		"type": "fixed",

@@ -5,6 +5,7 @@
 	"properties": {
 		"$schema": { "type": "string" },
 		"name": { "type": "string" },
+		"slug": { "type": "string" },
 		"port": { "type": "integer" },
 		"pricing": {
 			"type": "object",

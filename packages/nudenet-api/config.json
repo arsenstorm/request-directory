@@ -1,6 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
-	"name": "nudenet-api",
+	"name": "NudeNet",
+	"slug": "nudenet",
 	"port": 7001,
 	"pricing": {
 		"type": "fixed",

@@ -12,7 +12,7 @@ const handleRequest = async (request: NextRequest, {
 }>) => {
   const { id, all } = await params;
 
-  /*const { valid, error, key } = await auth.api.verifyApiKey({
+  const { valid, error, key } = await auth.api.verifyApiKey({
     body: {
       key: request.headers.get("x-api-key") ?? "",
     },
@@ -25,11 +25,11 @@ const handleRequest = async (request: NextRequest, {
       },
       { status: 401 },
     );
-  }*/
+  }
 
   const configFiles = await getConfig();
 
-  const config = configFiles.find((config) => config.name === id);
+  const config = configFiles.find((config) => config.slug === id);
 
   if (!config) {
     return NextResponse.json(
@@ -105,9 +105,9 @@ const handleRequest = async (request: NextRequest, {
     if (success) {
       after(async () => {
         const price = config.pricing.price;
-        //const userId = key?.userId;
+        const userId = key?.userId;
 
-        console.log(price);
+        console.log(price, userId);
       });
     }
 

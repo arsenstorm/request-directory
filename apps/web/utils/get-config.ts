@@ -7,6 +7,7 @@ export type ApiPath = `@${"get" | "post" | "put" | "delete"}/${string}`;
 
 export interface Config {
   name: string;
+  slug: string;
   port: number;
   pricing: {
     type: "fixed";
