@@ -1,0 +1,12 @@
+[project]
+name = "ageandgender"
+version = "0.1.0"
+description = "Determine age and gender of a person from an image"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1.0",
+    "flask-cors>=5.0.1",
+    "opencv-python>=4.11.0.86",
+    "python-dotenv>=1.1.0",
+]

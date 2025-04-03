@@ -1,0 +1,13 @@
+[project]
+name = "nudenet-api"
+version = "0.1.0"
+description = "Detect nudity in an image"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1.0",
+    "flask-cors>=5.0.1",
+    "nudenet>=3.4.2",
+    "opencv-python>=4.11.0.86",
+    "python-dotenv>=1.1.0",
+]

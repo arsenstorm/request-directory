@@ -1,0 +1,44 @@
+name: Generate Attestation
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      image_digest:
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      image_name:
+        required: true
+        type: string
+      image_digest:
+        required: true
+        type: string
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+      attestations: write
+      actions: write
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_GITHUB_TOKEN }}
+
+      - name: Generate Attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ inputs.image_name }}
+          subject-digest: ${{ inputs.image_digest }}
+          push-to-registry: true 

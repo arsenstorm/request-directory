@@ -1,0 +1,20 @@
+[project]
+name = "video-dl"
+version = "1.0.0"
+description = "Video downloader API for YouTube, TikTok, and other platforms."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.35.97",
+    "Flask==2.3.2",
+    "flask-cors>=4.0.2",
+    "python-dotenv==1.0.0",
+    "requests>=2.32.3",
+    "uuid>=1.30",
+    "yt-dlp==2024.12.23",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]

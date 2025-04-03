@@ -1,0 +1,91 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: read
+      attestations: write
+      actions: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_GITHUB_TOKEN }}
+
+      - name: Determine modified packages
+        id: changes
+        run: |
+          if git rev-parse HEAD^ >/dev/null 2>&1; then
+            CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | grep "^packages/" | sed 's|packages/\([^/]*\)/.*|\1|' | sort -u)
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD | grep "^packages/" | sed 's|packages/\([^/]*\)/.*|\1|' | sort -u)
+          fi
+          
+          PACKAGES_WITH_DOCKERFILE=""
+          for package in $CHANGED_FILES; do
+            if [[ -f "packages/$package/Dockerfile" ]]; then
+              PACKAGES_WITH_DOCKERFILE="$PACKAGES_WITH_DOCKERFILE $package"
+            fi
+          done
+          
+          PACKAGES_WITH_DOCKERFILE=$(echo "$PACKAGES_WITH_DOCKERFILE" | xargs)
+          
+          if [ -n "$PACKAGES_WITH_DOCKERFILE" ]; then
+            echo "CHANGED_FOLDERS=$PACKAGES_WITH_DOCKERFILE" >> $GITHUB_ENV
+          else
+            echo "CHANGED_FOLDERS=" >> $GITHUB_ENV
+          fi
+
+      - name: Build and push Docker images
+        if: env.CHANGED_FOLDERS != ''
+        id: build_push
+        run: |
+          # Build all images first
+          for package in $CHANGED_FOLDERS; do
+            if [ -f "packages/$package/Dockerfile" ]; then
+              IMAGE_NAME="ghcr.io/${{ github.actor }}/$package"
+              BUILD_OUTPUT=$(docker buildx build \
+                --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+                --label "org.opencontainers.image.description=Public container image for $package" \
+                --label "org.opencontainers.image.licenses=AGPL-3.0" \
+                --push \
+                --platform linux/amd64 \
+                -t $IMAGE_NAME \
+                --provenance=false \
+                --output type=image,push=true \
+                packages/$package 2>&1)
+              
+              DIGEST=$(echo "$BUILD_OUTPUT" | grep "pushing manifest.*@sha256:" | head -n1 | sed 's/.*@\(sha256:[a-f0-9]*\).*/\1/' | tr -d '\n\r')
+              
+              # Generate attestation for each image individually
+              echo "image_names=$IMAGE_NAME" >> $GITHUB_OUTPUT
+              echo "image_digests=$DIGEST" >> $GITHUB_OUTPUT
+              
+              echo "Generating attestation for $IMAGE_NAME"
+              gh workflow run generate_attestation.yml \
+                -f image_name=$IMAGE_NAME \
+                -f image_digest=$DIGEST \
+                -R ${{ github.repository }}
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,21 @@
+{
+	"name": "request-directory",
+	"private": true,
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"lint": "turbo run lint",
+		"test": "turbo run test",
+		"check-types": "turbo run check-types",
+		"build-run": "bun run scripts/build-run.ts"
+	},
+	"devDependencies": {
+		"prettier": "^3.5.3",
+		"turbo": "^2.4.4"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"packageManager": "bun@1.2.6",
+	"workspaces": ["apps/*", "packages/*", "scripts"]
+}
