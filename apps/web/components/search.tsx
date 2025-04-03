@@ -65,18 +65,18 @@ function useAutocomplete({
 	}
 
 	function filterApiEntries(query: string) {
-		return ([key, api]: [string, any]) => {
+		return (api: any) => {
 			const searchString =
-				`${key} ${api.name} ${api.oneLiner} ${api.tag}`.toLowerCase();
+				`${api.name} ${api.description} ${api.tag}`.toLowerCase();
 			return searchString.includes(query.toLowerCase());
 		};
 	}
 
-	function mapApiToResult([key, api]: [string, any]): Result {
+	function mapApiToResult(api: any): Result {
 		return {
-			url: `/${key}`,
+			url: `/${api.slug}`,
 			title: api.name,
-			description: api.oneLiner,
+			description: api.description,
 			tag: api.tag,
 		};
 	}
@@ -105,9 +105,7 @@ function useAutocomplete({
 					{
 						sourceId: "apis",
 						getItems() {
-							return Object.entries(config.api)
-								.filter(filterApiEntries(query))
-								.map(mapApiToResult);
+							return config.filter(filterApiEntries(query)).map(mapApiToResult);
 						},
 						getItemUrl({ item }: { item: Result }) {
 							return item.url;
@@ -181,7 +179,7 @@ function HighlightQuery({
 }: { readonly text: string; readonly query: string }) {
 	return (
 		<Highlighter
-			highlightClassName="underline bg-transparent text-emerald-500"
+			highlightClassName="underline bg-transparent text-amber-500"
 			searchWords={[query]}
 			textToHighlight={text}
 			autoEscape
@@ -206,23 +204,19 @@ function SearchResult({
 }) {
 	const id = useId();
 
-	// Filter for the matching API based on the result key
-	const matchingApi = Object.entries(config.api).find(
-		([key, api]: [string, any]) => {
-			const searchString =
-				`${key} ${api.name} ${api.oneLiner} ${api.tag}`.toLowerCase();
-			return searchString.includes(result.title.toLowerCase());
-		},
-	) as any;
+	// Find the matching API based on the result slug
+	const matchingApi = config.find(
+		(api: any) => api.slug === result.url.replace("/", ""),
+	);
 
-	// If a match is found, extract the oneLiner for the hierarchy
-	const hierarchy = matchingApi ? [matchingApi[1].oneLiner] : [];
+	// Extract description for the hierarchy
+	const hierarchy = matchingApi ? [matchingApi.description] : [];
 
 	return (
 		<li
 			className={clsx(
-				"group block cursor-default px-4 py-3 aria-selected:bg-zinc-50 dark:aria-selected:bg-zinc-800/50",
-				resultIndex > 0 && "border-t border-zinc-100 dark:border-zinc-800",
+				"group block cursor-default px-4 py-3 aria-selected:bg-zinc-50",
+				resultIndex > 0 && "border-t border-zinc-100",
 			)}
 			aria-labelledby={`${id}-hierarchy ${id}-title`}
 			{...autocomplete.getItemProps({
@@ -233,7 +227,7 @@ function SearchResult({
 			<div
 				id={`${id}-title`}
 				aria-hidden="true"
-				className="text-sm font-medium text-zinc-900 group-aria-selected:text-emerald-500 dark:text-white"
+				className="text-sm font-medium text-zinc-900 group-aria-selected:text-amber-500"
 			>
 				<HighlightQuery text={result.title} query={query} />
 			</div>
@@ -250,7 +244,7 @@ function SearchResult({
 								className={
 									itemIndex === items.length - 1
 										? "sr-only"
-										: "mx-2 text-zinc-300 dark:text-zinc-700"
+										: "mx-2 text-zinc-300"
 								}
 							>
 								/
@@ -265,7 +259,7 @@ function SearchResult({
 
 function Quote({ children }: { readonly children: React.ReactNode }) {
 	return (
-		<strong className="break-words font-semibold text-zinc-900 dark:text-white">
+		<strong className="break-words font-semibold text-zinc-900">
 			“{children}”
 		</strong>
 	);
@@ -285,8 +279,8 @@ function SearchResults({
 	if (!collection || collection.items.length === 0) {
 		return (
 			<div className="p-6 text-center">
-				<NoResultsIcon className="mx-auto h-5 w-5 stroke-zinc-900 dark:stroke-zinc-600" />
-				<p className="mt-2 text-xs text-zinc-700 dark:text-zinc-400">
+				<NoResultsIcon className="mx-auto h-5 w-5 stroke-zinc-900" />
+				<p className="mt-2 text-xs text-zinc-700">
 					Nothing found for <Quote>{query}</Quote>. Please try again.
 				</p>
 			</div>
@@ -348,7 +342,7 @@ const SearchInput = forwardRef<
 				ref={inputRef}
 				data-autofocus
 				className={clsx(
-					"flex-auto appearance-none bg-transparent pl-10 text-zinc-900 outline-none placeholder:text-zinc-500 focus:w-full focus:flex-none sm:text-sm dark:text-white [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden",
+					"flex-auto appearance-none bg-transparent pl-10 text-zinc-900 outline-none placeholder:text-zinc-500 focus:w-full focus:flex-none sm:text-sm [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden",
 					autocompleteState.status === "stalled" ? "pr-11" : "pr-4",
 				)}
 				{...inputProps}
@@ -356,7 +350,7 @@ const SearchInput = forwardRef<
 			/>
 			{autocompleteState.status === "stalled" && (
 				<div className="absolute inset-y-0 right-3 flex items-center">
-					<LoadingIcon className="h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900 dark:stroke-zinc-800 dark:text-emerald-400" />
+					<LoadingIcon className="h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900" />
 				</div>
 			)}
 		</div>
@@ -376,7 +370,7 @@ const SearchResultsPanel = ({
 }) => (
 	<div
 		ref={panelRef}
-		className="border-t border-zinc-200 bg-white empty:hidden dark:border-zinc-100/5 dark:bg-white/2.5"
+		className="border-t border-zinc-200 bg-white empty:hidden"
 		{...autocomplete.getPanelProps({})}
 	>
 		{autocompleteState.isOpen && (
@@ -410,7 +404,7 @@ const SearchDialogContent = ({
 	<div {...autocomplete.getRootProps({})}>
 		<form
 			ref={formRef}
-			{...autocomplete.getFormProps({ inputElement: inputRef.current })}
+			{...autocomplete.getFormProps({ inputElement: inputRef.current ?? null })}
 		>
 			<SearchInput
 				ref={inputRef}
@@ -439,9 +433,9 @@ function SearchDialog({
 	readonly setOpen: (open: boolean) => void;
 	readonly className?: string;
 }) {
-	const formRef = useRef<React.ElementRef<"form">>(null);
-	const panelRef = useRef<React.ElementRef<"div">>(null);
-	const inputRef = useRef<React.ElementRef<typeof SearchInput>>(null);
+	const formRef = useRef<HTMLFormElement>(null);
+	const panelRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 	const { autocomplete, autocompleteState } = useAutocomplete({
 		close() {
 			setOpen(false);
@@ -494,19 +488,19 @@ function SearchDialog({
 		>
 			<DialogBackdrop
 				transition
-				className="fixed inset-0 bg-zinc-400/25 backdrop-blur-sm data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in dark:bg-black/40"
+				className="fixed inset-0 bg-zinc-400/25 backdrop-blur-sm data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"
 			/>
 
 			<div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh]">
 				<DialogPanel
 					transition
-					className="mx-auto transform-gpu overflow-hidden rounded-lg bg-zinc-50 shadow-xl ring-1 ring-zinc-900/7.5 data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:max-w-xl dark:bg-zinc-900 dark:ring-zinc-800"
+					className="mx-auto transform-gpu overflow-hidden rounded-lg bg-zinc-50 shadow-xl ring-1 ring-zinc-900/7.5 data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:max-w-xl"
 				>
 					<SearchDialogContent
 						config={config}
-						formRef={formRef}
-						inputRef={inputRef}
-						panelRef={panelRef}
+						formRef={formRef as React.RefObject<HTMLFormElement>}
+						inputRef={inputRef as React.RefObject<HTMLInputElement>}
+						panelRef={panelRef as React.RefObject<HTMLDivElement>}
 						autocomplete={autocomplete}
 						autocompleteState={autocompleteState}
 						onClose={handleSearchClose}
@@ -555,12 +549,12 @@ export function Search({ config }: Readonly<{ config: any }>) {
 		<div className="hidden lg:block lg:max-w-md lg:flex-auto">
 			<button
 				type="button"
-				className="hidden h-8 w-full items-center gap-2 rounded-full bg-white pl-2 pr-3 text-sm text-zinc-500 ring-1 ring-zinc-900/10 transition hover:ring-zinc-900/20 ui-not-focus-visible:outline-none lg:flex dark:bg-white/5 dark:text-zinc-400 dark:ring-inset dark:ring-white/10 dark:hover:ring-white/20"
+				className="hidden h-8 w-full items-center gap-2 rounded-full bg-white pl-2 pr-3 text-sm text-zinc-500 ring-1 ring-zinc-900/10 transition hover:ring-zinc-900/20 ui-not-focus-visible:outline-none lg:flex"
 				{...buttonProps}
 			>
 				<SearchIcon className="h-5 w-5 stroke-current" />
 				Find an API...
-				<kbd className="ml-auto text-2xs text-zinc-400 dark:text-zinc-500">
+				<kbd className="ml-auto text-2xs text-zinc-400">
 					<kbd className="font-sans">{modifierKey}</kbd>
 					<kbd className="font-sans">+ K</kbd>
 				</kbd>
@@ -593,7 +587,7 @@ export function MobileSearch({
 				aria-label="Find an API..."
 				{...buttonProps}
 			>
-				<SearchIcon className="size-6 stroke-zinc-900 dark:stroke-white" />
+				<SearchIcon className="size-6 stroke-zinc-900" />
 			</button>
 			<Suspense fallback={null}>
 				<SearchDialog className="lg:hidden" config={config} {...dialogProps} />

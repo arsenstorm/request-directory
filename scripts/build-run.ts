@@ -9,18 +9,24 @@ const execAsync = promisify(exec);
 
 async function checkAndKillProcessOnPort(port: number): Promise<void> {
 	try {
-		const { stdout } = await execAsync(`docker ps --format '{{.ID}}' -f "publish=${port}"`);
+		const { stdout } = await execAsync(
+			`docker ps --format '{{.ID}}' -f "publish=${port}"`,
+		);
 		const containerId = stdout.trim();
 
 		if (containerId) {
-			console.log(`Found Docker container ${containerId} using port ${port}. Stopping it...`);
+			console.log(
+				`Found Docker container ${containerId} using port ${port}. Stopping it...`,
+			);
 			await execAsync(`docker stop ${containerId}`);
 			console.log(`Docker container ${containerId} stopped.`);
 		} else {
 			console.log(`No Docker container found using port ${port}.`);
 		}
 	} catch (error) {
-		console.log(`Error checking for Docker containers on port ${port}: ${error}`);
+		console.log(
+			`Error checking for Docker containers on port ${port}: ${error}`,
+		);
 	}
 }
 
@@ -30,15 +36,15 @@ async function loadEnvFile(filePath: string): Promise<string[]> {
 		console.log(`No .env file found at ${filePath}, skipping env variables.`);
 		return [];
 	}
-	
+
 	const envContent = await readFile(filePath, "utf-8");
 	const envVars: string[] = [];
-	
+
 	const lines = envContent.split("\n");
 	for (const line of lines) {
 		// Skip empty lines or comments
 		if (!line.trim() || line.startsWith("#")) continue;
-		
+
 		// Get "KEY=VALUE" pairs
 		const match = line.match(/^([^=]+)=(.*)$/);
 		if (match) {
@@ -47,7 +53,7 @@ async function loadEnvFile(filePath: string): Promise<string[]> {
 			envVars.push(`--env ${key}=${value}`);
 		}
 	}
-	
+
 	return envVars;
 }
 
@@ -85,7 +91,7 @@ async function buildAndRun() {
 		const envFilePath = join(packagePath, ".env");
 		const envVars = await loadEnvFile(envFilePath);
 		const envString = envVars.join(" ");
-		
+
 		// Run Docker container with env vars
 		console.log("\nRunning Docker container...");
 		const runCommand = `docker run --rm -p ${port}:${port} ${envString} ${config.name}`;

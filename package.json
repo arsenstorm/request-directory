@@ -18,5 +18,8 @@
 		"node": ">=20"
 	},
 	"packageManager": "bun@1.2.6",
-	"workspaces": ["apps/*", "packages/*", "scripts"]
+	"workspaces": ["apps/*", "packages/*", "scripts"],
+	"dependencies": {
+		"@mantine/hooks": "^7.17.3"
+	}
 }

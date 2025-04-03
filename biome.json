@@ -9,7 +9,8 @@
 			"out",
 			"build-output",
 			".wrangler",
-			".next"
+			".next",
+			".venv"
 		],
 		"ignoreUnknown": true
 	},

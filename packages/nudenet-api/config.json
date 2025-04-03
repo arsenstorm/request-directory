@@ -2,6 +2,7 @@
 	"$schema": "https://raw.githubusercontent.com/arsenstorm/request-directory/main/schema.json",
 	"name": "NudeNet",
 	"slug": "nudenet",
+	"description": "Detect if an image is NSFW.",
 	"port": 7001,
 	"pricing": {
 		"type": "fixed",

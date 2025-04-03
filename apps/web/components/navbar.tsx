@@ -5,7 +5,7 @@ import {
 	DisclosureButton,
 	DisclosurePanel,
 } from "@headlessui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { MobileSearch, Search } from "./search";
 import { PlusGrid, PlusGridItem, PlusGridRow } from "./plus-grid";
@@ -18,31 +18,29 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "./logo";
 import { Bars2Icon } from "@heroicons/react/24/solid";
 
-// Supabase
-import { createClient } from "@/utils/supabase/client";
-import type { Session } from "@supabase/supabase-js";
+// Auth
+import type { User } from "better-auth";
+import { useAuth } from "@/auth/provider";
+import { auth } from "@/auth/client";
 
 const links = [{ href: "", label: "..." }];
 
 function DesktopNav({
-	session,
+	user,
 	signInWithGitHub,
 }: Readonly<{
-	session: Session | null;
+	user: User | null;
 	signInWithGitHub: () => Promise<void>;
 }>) {
 	return (
 		<nav className="relative hidden lg:flex">
 			<PlusGridItem className="relative flex">
 				<div className="flex items-center px-4 p-3 text-base font-medium text-gray-950">
-					{session ? (
+					{user ? (
 						<Link href="/account" className="flex items-center gap-2">
-							<Avatar
-								src={session.user?.user_metadata?.avatar_url}
-								className="size-8"
-							/>
+							<Avatar src={user?.image} className="size-8" />
 							<p className="text-base font-medium text-gray-950">
-								{session.user?.user_metadata?.name ?? "Guest"}
+								{user?.name ?? "Guest"}
 							</p>
 						</Link>
 					) : (
@@ -66,10 +64,10 @@ function MobileNavButton() {
 }
 
 function MobileNav({
-	session,
+	user,
 	signInWithGitHub,
 }: Readonly<{
-	session: Session | null;
+	user: User | null;
 	signInWithGitHub: () => Promise<void>;
 }>) {
 	return (
@@ -84,14 +82,11 @@ function MobileNav({
 						rotateX: { duration: 0.3, delay: links.length * 0.1 },
 					}}
 				>
-					{session ? (
+					{user ? (
 						<Link href="/account" className="flex items-center gap-2">
-							<Avatar
-								src={session.user?.user_metadata?.avatar_url}
-								className="size-8"
-							/>
+							<Avatar src={user?.image} className="size-8" />
 							<p className="text-base font-medium text-gray-950">
-								Logged in as {session.user?.user_metadata?.name ?? "Guest"}
+								Logged in as {user?.name ?? "Guest"}
 							</p>
 						</Link>
 					) : (
@@ -110,28 +105,14 @@ function MobileNav({
 }
 
 export default function Navbar({ config }: Readonly<{ config: any }>) {
-	const supabase = createClient();
-	const [session, setSession] = useState<Session | null>(null);
+	const { user } = useAuth();
 
 	const signInWithGitHub = useCallback(async () => {
-		await supabase.auth.signInWithOAuth({
+		await auth.signIn.social({
 			provider: "github",
-			options: {
-				redirectTo: `${window.location.origin}/account`,
-			},
+			callbackURL: `${window.location.origin}/account`,
 		});
-	}, [supabase]);
-
-	useEffect(() => {
-		async function getSession() {
-			const {
-				data: { session },
-			} = await supabase.auth.getSession();
-			setSession(session);
-		}
-
-		getSession();
-	}, [supabase]);
+	}, []);
 
 	return (
 		<Disclosure as="header" className="my-4">
@@ -147,7 +128,7 @@ export default function Navbar({ config }: Readonly<{ config: any }>) {
 							<Search config={config} />
 						</PlusGridItem>
 					</div>
-					<DesktopNav session={session} signInWithGitHub={signInWithGitHub} />
+					<DesktopNav user={user} signInWithGitHub={signInWithGitHub} />
 					<div className="flex lg:hidden flex-row items-center gap-0.5">
 						<div className="flex size-12 items-center justify-center self-center rounded-lg hover:bg-black/5 lg:hidden">
 							<MobileSearch config={config} />
@@ -156,7 +137,7 @@ export default function Navbar({ config }: Readonly<{ config: any }>) {
 					</div>
 				</PlusGridRow>
 			</PlusGrid>
-			<MobileNav session={session} signInWithGitHub={signInWithGitHub} />
+			<MobileNav user={user} signInWithGitHub={signInWithGitHub} />
 		</Disclosure>
 	);
 }

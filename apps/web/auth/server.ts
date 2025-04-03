@@ -29,6 +29,22 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: false,
 	},
+	user: {
+		additionalFields: {
+			balance: {
+				type: "number",
+				defaultValue: 0,
+				bigint: true,
+				required: false,
+				transform: {
+					input() {
+						throw new Error("Modifying the balance is not allowed.");
+					},
+				},
+				returned: true,
+			},
+		},
+	},
 	socialProviders: {
 		github: {
 			clientId: process.env.GITHUB_CLIENT_ID as string,

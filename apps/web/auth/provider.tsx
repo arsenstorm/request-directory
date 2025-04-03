@@ -15,11 +15,7 @@ import { auth } from "@/auth/client";
 import type { Session, User } from "better-auth";
 
 export type UserWithAdditionalFields = User & {
-	termsAccepted: boolean;
-	loveToStudy: string;
-	applyingNow: string;
-	citizenshipStatus: string;
-	claimedPhoneNumber: string;
+	balance?: number | null;
 };
 
 /**
@@ -30,7 +26,7 @@ export interface AuthSessionContext {
 	readonly user: UserWithAdditionalFields | null;
 	readonly status: "loading" | "authenticated" | "unauthenticated";
 	readonly update: () => void;
-	readonly termsAccepted: boolean;
+	readonly balance?: number | null;
 }
 
 export const AuthContext = createContext<AuthSessionContext>({
@@ -38,7 +34,7 @@ export const AuthContext = createContext<AuthSessionContext>({
 	user: null,
 	status: "loading",
 	update: () => {},
-	termsAccepted: false,
+	balance: 0,
 });
 
 export function useAuth() {
@@ -76,7 +72,7 @@ export default function AuthProvider({
 			user,
 			status,
 			update,
-			termsAccepted: user?.termsAccepted ?? false,
+			balance: user?.balance ?? 0,
 		}),
 		[session, user, status, update],
 	);
