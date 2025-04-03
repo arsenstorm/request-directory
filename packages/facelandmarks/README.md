@@ -33,7 +33,7 @@ To use the API, you need to send a POST request containing form data to the
 
 As an example, we’ll upload this image:
 
-<img src="../.github/facelandmarks/example_input.jpg" alt="example_input" style="max-width: 500px;">
+<img src="../../.github/facelandmarks/example_input.jpg" alt="example_input" style="max-width: 500px;">
 
 ```bash
 curl -X POST http://localhost:7002/infer -F "image=@.github/facelandmarks/example_input.jpg"
@@ -96,7 +96,7 @@ confidence of the detection.
 The image is returned as a base64 encoded string, which can be decoded where
 it’ll look like this:
 
-<img src="../.github/facelandmarks/example_output.jpg" alt="example_output" style="max-width: 500px;">
+<img src="../../.github/facelandmarks/example_output.jpg" alt="example_output" style="max-width: 500px;">
 
 > [!TIP]
 >

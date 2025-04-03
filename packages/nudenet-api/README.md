@@ -33,7 +33,7 @@ To use the API, you need to send a POST request containing form data to the
 
 As an example, we’ll upload the unblurred version of this image:
 
-<img src="../.github/nudenet/example_input_blurred.jpg" alt="example_input" style="max-width: 500px;">
+<img src="../../.github/nudenet/example_input_blurred.jpg" alt="example_input" style="max-width: 500px;">
 
 ```bash
 curl -X POST http://localhost:7001/infer -F "image=@.github/nudenet/example_input.jpg"
@@ -42,7 +42,7 @@ curl -X POST http://localhost:7001/infer -F "image=@.github/nudenet/example_inpu
 > [!NOTE]
 >
 > In this example, the image was submitted unblurred. You can find the unblurred
-> version [here](../.github/nudenet/example_input.jpg).
+> version [here](../../.github/nudenet/example_input.jpg).
 
 #### Example Response
 
@@ -127,8 +127,8 @@ In this response, we’ve received these details:
 
 The images have not been included in this README, but you can view the unblurred
 versions of the labelled and censored images
-[here](../.github/nudenet/example_response_labelled.jpg) and
-[here](../.github/nudenet/example_response_censored.jpg) respectively.
+[here](../../.github/nudenet/example_response_labelled.jpg) and
+[here](../../.github/nudenet/example_response_censored.jpg) respectively.
 
 ## Notes
 

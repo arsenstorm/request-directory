@@ -33,7 +33,7 @@ To use the API, you need to send a POST request containing form data to the
 
 As an example, we’ll upload this image:
 
-<img src="../.github/ageandgender/example_input.jpg" alt="example_input" style="max-width: 500px;">
+<img src="../../.github/ageandgender/example_input.jpg" alt="example_input" style="max-width: 500px;">
 
 ```bash
 curl -X POST http://localhost:7003/infer -F "image=@.github/ageandgender/example_input.jpg"
@@ -67,7 +67,7 @@ The `faces` array contains the age and gender of each face detected in the image
 The `image` field is a base64 encoded string, which can be decoded where
 it’ll look like this:
 
-<img src="../.github/ageandgender/example_output.jpg" alt="example_output" style="max-width: 500px;">
+<img src="../../.github/ageandgender/example_output.jpg" alt="example_output" style="max-width: 500px;">
 
 ## Notes
 
