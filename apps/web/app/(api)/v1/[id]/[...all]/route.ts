@@ -99,7 +99,11 @@ const handleRequest = async (
 	try {
 		const response = await fetch(url, {
 			method: request.method,
-			body,
+			headers: {
+				...request.headers,
+				...(type === "json" ? { "Content-Type": "application/json" } : {}),
+			},
+			body: type === "json" ? JSON.stringify(body) : body,
 		});
 
 		const responseBody = await response.json();
@@ -115,9 +119,15 @@ const handleRequest = async (
 			});
 		}
 
-		return NextResponse.json({
-			...responseBody,
-		});
+		// Try to parse the response as JSON, fallback to text if it fails
+		let parsedResponse: Record<string, unknown>;
+		try {
+			parsedResponse = JSON.parse(responseBody);
+		} catch (e) {
+			parsedResponse = responseBody;
+		}
+
+		return NextResponse.json(parsedResponse);
 	} catch (error) {
 		return NextResponse.json(
 			{

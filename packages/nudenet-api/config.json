@@ -16,7 +16,28 @@
 				"parameters": {
 					"image": {
 						"type": "file",
-						"required": true
+						"required": true,
+						"name": "Image",
+						"description": "The image to detect if it is NSFW",
+						"blur": true
+					}
+				}
+			},
+			"output": {
+				"type": "json",
+				"parameters": {
+					"censored_image": {
+						"type": "string",
+						"required": true,
+						"name": "Censored Image",
+						"description": "The censored image"
+					},
+					"labelled_image": {
+						"type": "string",
+						"required": true,
+						"name": "Labelled Image",
+						"description": "The labelled image",
+						"blur": true
 					}
 				}
 			}

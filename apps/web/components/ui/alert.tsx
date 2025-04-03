@@ -15,8 +15,8 @@ const sizes = {
 	"5xl": "sm:max-w-5xl",
 };
 
-export function Dialog({
-	size = "lg",
+export function Alert({
+	size = "md",
 	className,
 	children,
 	...props
@@ -29,18 +29,18 @@ export function Dialog({
 		<Headless.Dialog {...props}>
 			<Headless.DialogBackdrop
 				transition
-				className="fixed inset-0 flex w-screen justify-center overflow-y-auto bg-zinc-950/25 px-2 py-2 transition duration-100 focus:outline-0 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in sm:px-6 sm:py-8 lg:px-8 lg:py-16 dark:bg-zinc-950/50"
+				className="fixed inset-0 flex w-screen justify-center overflow-y-auto bg-zinc-950/15 px-2 py-2 transition duration-100 focus:outline-0 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in sm:px-6 sm:py-8 lg:px-8 lg:py-16 dark:bg-zinc-950/50"
 			/>
 
 			<div className="fixed inset-0 w-screen overflow-y-auto pt-6 sm:pt-0">
-				<div className="grid min-h-full grid-rows-[1fr_auto] justify-items-center sm:grid-rows-[1fr_auto_3fr] sm:p-4">
+				<div className="grid min-h-full grid-rows-[1fr_auto_1fr] justify-items-center p-8 sm:grid-rows-[1fr_auto_3fr] sm:p-4">
 					<Headless.DialogPanel
 						transition
 						className={clsx(
 							className,
 							sizes[size],
-							"row-start-2 w-full min-w-0 rounded-t-3xl bg-white p-(--gutter) ring-1 shadow-lg ring-zinc-950/10 [--gutter:--spacing(8)] sm:mb-auto sm:rounded-2xl dark:bg-zinc-900 dark:ring-white/10 forced-colors:outline",
-							"transition duration-100 will-change-transform data-closed:translate-y-12 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in sm:data-closed:translate-y-0 sm:data-closed:data-enter:scale-95",
+							"row-start-2 w-full rounded-2xl bg-white p-8 ring-1 shadow-lg ring-zinc-950/10 sm:rounded-2xl sm:p-6 dark:bg-zinc-900 dark:ring-white/10 forced-colors:outline",
+							"transition duration-100 will-change-transform data-closed:opacity-0 data-enter:ease-out data-closed:data-enter:scale-95 data-leave:ease-in",
 						)}
 					>
 						{children}
@@ -51,7 +51,7 @@ export function Dialog({
 	);
 }
 
-export function DialogTitle({
+export function AlertTitle({
 	className,
 	...props
 }: { className?: string } & Omit<
@@ -63,13 +63,13 @@ export function DialogTitle({
 			{...props}
 			className={clsx(
 				className,
-				"text-lg/6 font-semibold text-balance text-zinc-950 sm:text-base/6 dark:text-white",
+				"text-center text-base/6 font-semibold text-balance text-zinc-950 sm:text-left sm:text-sm/6 sm:text-wrap dark:text-white",
 			)}
 		/>
 	);
 }
 
-export function DialogDescription({
+export function AlertDescription({
 	className,
 	...props
 }: { className?: string } & Omit<
@@ -80,19 +80,19 @@ export function DialogDescription({
 		<Headless.Description
 			as={Text}
 			{...props}
-			className={clsx(className, "mt-2 text-pretty")}
+			className={clsx(className, "mt-2 text-center text-pretty sm:text-left")}
 		/>
 	);
 }
 
-export function DialogBody({
+export function AlertBody({
 	className,
 	...props
 }: React.ComponentPropsWithoutRef<"div">) {
-	return <div {...props} className={clsx(className, "mt-6")} />;
+	return <div {...props} className={clsx(className, "mt-4")} />;
 }
 
-export function DialogActions({
+export function AlertActions({
 	className,
 	...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -101,7 +101,7 @@ export function DialogActions({
 			{...props}
 			className={clsx(
 				className,
-				"mt-8 flex flex-col-reverse items-center justify-end gap-3 *:w-full sm:flex-row sm:*:w-auto",
+				"mt-6 flex flex-col-reverse items-center justify-end gap-3 *:w-full sm:mt-4 sm:flex-row sm:*:w-auto",
 			)}
 		/>
 	);

@@ -16,11 +16,15 @@
 				"parameters": {
 					"url": {
 						"type": "string",
-						"required": true
+						"required": true,
+						"name": "URL",
+						"description": "The URL of the video to download"
 					},
 					"format": {
 						"type": "string",
-						"required": true
+						"required": true,
+						"name": "Format",
+						"description": "The format of the video to download"
 					}
 				}
 			}
@@ -31,7 +35,9 @@
 				"parameters": {
 					"url": {
 						"type": "string",
-						"required": true
+						"required": true,
+						"name": "URL",
+						"description": "The URL of the video to list available formats for"
 					}
 				}
 			}

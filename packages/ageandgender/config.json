@@ -16,20 +16,20 @@
 				"parameters": {
 					"image": {
 						"type": "file",
-						"required": true
+						"required": true,
+						"name": "Image",
+						"description": "The image to detect the age and gender of"
 					}
 				}
 			},
 			"output": {
 				"type": "json",
 				"parameters": {
-					"faces": {
-						"type": "array",
-						"required": true
-					},
 					"image": {
 						"type": "string",
-						"required": true
+						"required": true,
+						"name": "Image",
+						"description": "The returned image with the face(s) outlined"
 					}
 				}
 			}

@@ -1,33 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import * as Headless from "@headlessui/react";
+// React
+import React from "react";
+
+// Headless UI
+import { DataInteractive as HeadlessDataInteractive } from "@headlessui/react";
+
+// Link
 import NextLink, { type LinkProps } from "next/link";
 
-export const Link = function Link({
-	ref,
-	...props
-}: Readonly<
-	LinkProps &
-		React.ComponentPropsWithoutRef<"a"> & {
-			ref?: React.Ref<HTMLAnchorElement>;
-		}
->) {
-	const router = useRouter();
-
+export const Link = React.forwardRef(function Link(
+	props: LinkProps & React.ComponentPropsWithoutRef<"a">,
+	ref: React.ForwardedRef<HTMLAnchorElement>,
+) {
 	return (
-		<Headless.DataInteractive>
-			<NextLink
-				ref={ref}
-				onMouseEnter={(e) => {
-					const href = typeof props.href === "string" ? props.href : null;
-					if (href) {
-						router.prefetch(href);
-					}
-					return props.onMouseEnter?.(e);
-				}}
-				{...props}
-			/>
-		</Headless.DataInteractive>
+		<HeadlessDataInteractive>
+			<NextLink ref={ref} prefetch {...props} />
+		</HeadlessDataInteractive>
 	);
-};
+});

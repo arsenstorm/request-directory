@@ -1,7 +1,7 @@
 "use client";
 
-import { Divider } from "./divider";
 import { Heading, Subheading } from "./heading";
+import { Divider } from "./divider";
 import { Text } from "./text";
 
 export function PageHeading({
@@ -29,13 +29,13 @@ export function PageHeading({
 
 export function PageSubheading({
 	title = "",
-	level = 2,
 	description = "",
+	level = 2,
 	children,
 }: {
 	readonly title: string | React.ReactNode;
-	readonly level?: 2 | 3 | 4 | 5 | 6;
 	readonly description: string;
+	readonly level?: 1 | 2 | 3 | 4 | 5 | 6;
 	readonly children?: React.ReactNode;
 }) {
 	return (

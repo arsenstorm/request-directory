@@ -59,7 +59,7 @@ export default async function API({
 				<Text>
 					To use this API, make a <Code>POST</Code> request to this endpoint:{" "}
 					<Code>https://request.directory/v1/{id}</Code> with your API key
-					in the <Code>Authorization</Code> header.
+					in the <Code>x-api-key</Code> header.
 				</Text>
 			</div>
 			<Divider className="my-4" />

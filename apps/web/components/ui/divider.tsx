@@ -1,14 +1,13 @@
-"use client";
-
 import clsx from "clsx";
 
 export function Divider({
 	soft = false,
 	className,
 	...props
-}: Readonly<{ soft?: boolean } & React.ComponentPropsWithoutRef<"hr">>) {
+}: { soft?: boolean } & React.ComponentPropsWithoutRef<"hr">) {
 	return (
 		<hr
+			role="presentation"
 			{...props}
 			className={clsx(
 				className,

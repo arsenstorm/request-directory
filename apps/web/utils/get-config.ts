@@ -32,6 +32,22 @@ export interface Config {
 					{
 						type: "string" | "number" | "boolean" | "file";
 						required: boolean;
+						name?: string;
+						description?: string;
+						blur?: boolean;
+					}
+				>;
+			};
+			output?: {
+				type: "json";
+				parameters: Record<
+					string,
+					{
+						type: "string" | "array" | "number" | "boolean";
+						required: boolean;
+						name?: string;
+						description?: string;
+						blur?: boolean;
 					}
 				>;
 			};
