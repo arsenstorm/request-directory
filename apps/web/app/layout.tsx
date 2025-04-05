@@ -5,7 +5,7 @@ import "@/styles/globals.css";
 import AuthProvider from "@/auth/provider";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
-import { getConfig } from "@/utils/get-config";
+import { config } from "@/utils/get-config";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 		template: "%s - Request Directory",
 	},
 	description:
-		"An open-source alternative to RapidAPI, allowing you to use APIs for pretty much anything with a single API key!",
+		"A directory of awesome APIs, ready to be used in your projects.",
 };
 
 export default async function RootLayout({
@@ -23,8 +23,6 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	const config = await getConfig();
-
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
@@ -36,7 +34,7 @@ export default async function RootLayout({
 			<body className="antialiased bg-neutral-100/50">
 				<ThemeProvider forcedTheme="light">
 					<AuthProvider>
-						<div className="flex flex-col flex-1 min-h-screen px-4">
+						<div className="flex flex-col flex-1 min-h-screen px-4 max-w-screen overflow-x-hidden w-full">
 							<Navbar config={config} />
 							<div className="flex-1">{children}</div>
 							<Footer />

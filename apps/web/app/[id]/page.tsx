@@ -1,9 +1,9 @@
 // UI
-import { Heading, Subheading } from "@/components/ui/heading";
+import { Heading } from "@/components/ui/heading";
 import { Code, Text } from "@/components/ui/text";
 
 // Utils
-import { getConfig } from "@/utils/get-config";
+import { config } from "@/utils/get-config";
 
 // Hooks
 import { notFound } from "next/navigation";
@@ -16,8 +16,6 @@ export async function generateMetadata({
 	params,
 }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
-
-	const config = await getConfig();
 
 	const api = config.find((api) => api.slug === id);
 
@@ -38,8 +36,6 @@ export default async function API({
 	params,
 }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
-
-	const config = await getConfig();
 
 	const api = config.find((api) => api.slug === id);
 
@@ -69,8 +65,6 @@ export default async function API({
 }
 
 export async function generateStaticParams() {
-	const config = await getConfig();
-
 	return config.map((api) => ({
 		id: api.slug,
 	}));

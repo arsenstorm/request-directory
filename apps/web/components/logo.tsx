@@ -19,7 +19,7 @@ export function Logo({ className }: { readonly className?: string }) {
 			viewBox="0 0 175 34"
 			className={clsx(className, "overflow-visible")}
 		>
-			<title>API Directory</title>
+			<title>Request Directory</title>
 			<motion.g
 				variants={{
 					idle: { scale: 1, opacity: 1 },
@@ -89,7 +89,7 @@ export function Logo({ className }: { readonly className?: string }) {
 export function Mark({ className }: { readonly className?: string }) {
 	return (
 		<svg viewBox="0 0 34 34" fill="none" className={className}>
-			<title>API Directory</title>
+			<title>Request Directory</title>
 			<path d="M19.598 18.5C18.7696 19.9349 16.9348 20.4265 15.4999 19.5981C14.065 18.7696 13.5734 16.9349 14.4018 15.5C15.2303 14.0651 17.065 13.5735 18.4999 14.4019C19.9348 15.2303 20.4264 17.0651 19.598 18.5Z" />
 			<path d="M23.232 10.2058C22.6797 11.1623 21.4565 11.4901 20.4999 10.9378C19.5433 10.3855 19.2156 9.16235 19.7679 8.20576C20.3201 7.24918 21.5433 6.92143 22.4999 7.47371C23.4565 8.026 23.7842 9.24918 23.232 10.2058Z" />
 			<path d="M19.7679 25.7944C19.2156 24.8378 19.5433 23.6146 20.4999 23.0623C21.4565 22.51 22.6797 22.8378 23.232 23.7944C23.7843 24.7509 23.4565 25.9741 22.4999 26.5264C21.5433 27.0787 20.3202 26.7509 19.7679 25.7944Z" />

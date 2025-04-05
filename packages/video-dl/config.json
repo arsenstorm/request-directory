@@ -3,7 +3,7 @@
 	"name": "Video Downloader",
 	"slug": "video-dl",
 	"description": "Download videos from a URL.",
-	"port": 7005,
+	"port": 7004,
 	"pricing": {
 		"type": "fixed",
 		"price": 0.01

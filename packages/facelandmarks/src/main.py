@@ -21,7 +21,8 @@ app = Flask(__name__)
 def detect_landmarks(image):
     """This function detects face landmarks on an image."""
     det = hdface_detector(use_cuda=False)
-    checkpoint = torch.load(f'{os.path.dirname(__file__)}/faceland.pth', map_location=torch.device('cpu'), weights_only=True)
+    checkpoint = torch.load(f'{os.path.dirname(__file__)}/faceland.pth',
+                            map_location=torch.device('cpu'), weights_only=True)
 
     plfd_backbone = FaceLanndInference()
     plfd_backbone.load_state_dict(checkpoint)
@@ -141,6 +142,14 @@ def infer():
         return detect_landmarks(image)
     except Exception as e:
         return jsonify({"error": str(e), "success": False}), 500
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        "success": True,
+        "message": "OK"
+    }), 200
 
 
 if __name__ == '__main__':

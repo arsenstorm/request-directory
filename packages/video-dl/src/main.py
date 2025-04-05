@@ -34,18 +34,19 @@ def download():
         return jsonify({"error": "No URL provided.", "success": False}), 400
 
     format_quality = data.get('format')
-    
+
     # If format is not specified, we'll just get metadata and subtitles
     if format_quality is None:
         try:
             logger.info(f"Processing metadata from URL: {data['url']}")
             result = video_service.process_video(data['url'])
-            logger.info(f"Successfully processed metadata: {result.get('video_id')}")
+            logger.info(
+                f"Successfully processed metadata: {result.get('video_id')}")
             return jsonify(result)
         except Exception as e:
             logger.error(f"Error processing metadata: {str(e)}", exc_info=True)
             return jsonify({"error": "Failed to process metadata.", "success": False}), 500
-    
+
     valid_formats = ['low', 'medium', 'high', 'max']
 
     if format_quality not in valid_formats:
@@ -80,6 +81,14 @@ def list_formats():
     except Exception as e:
         logger.error(f"Error listing formats: {str(e)}", exc_info=True)
         return jsonify({"error": "Failed to list formats.", "success": False}), 500
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        "success": True,
+        "message": "OK"
+    }), 200
 
 
 if __name__ == '__main__':

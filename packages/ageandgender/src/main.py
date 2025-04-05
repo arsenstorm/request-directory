@@ -71,7 +71,7 @@ def detect_age_gender(image):
             face_img, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
         gender_net.setInput(blob)
         gender_preds = gender_net.forward()
-        #print(gender_preds[0]) # [0.18877535 0.81122464]
+        # print(gender_preds[0]) # [0.18877535 0.81122464]
         gender = GENDERS[int(gender_preds[0].argmax())]
 
         age_net.setInput(blob)
@@ -126,6 +126,14 @@ def infer():
             "error": str(e),
             "success": False
         }), 500
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        "success": True,
+        "message": "OK"
+    }), 200
 
 
 if __name__ == '__main__':

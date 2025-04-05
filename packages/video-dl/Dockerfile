@@ -24,10 +24,10 @@ RUN mkdir -p src/downloads
 
 RUN chmod +x /app/src/update_ytdlp.py
 
-EXPOSE 7005
+EXPOSE 7004
 
 ENV VIDEODL_DEBUG=false \
-    VIDEODL_PORT=7005 \
+    VIDEODL_PORT=7004 \
     R2_ENDPOINT="" \
     R2_BUCKET="" \
     R2_PUBLIC_URL="" \

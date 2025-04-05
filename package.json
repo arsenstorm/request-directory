@@ -8,7 +8,10 @@
 		"test": "turbo run test",
 		"check-types": "turbo run check-types",
 		"build-run": "bun run scripts/build-run.ts",
-		"format": "bunx @biomejs/biome format --write ./"
+		"format": "bunx @biomejs/biome format --write ./",
+		"docker:inspect": "docker run -it --rm request-directory ls -la",
+		"docker:build": "docker build -t request-directory -f apps/web/Dockerfile .",
+		"docker:run": "docker run -p 3000:3000 request-directory"
 	},
 	"devDependencies": {
 		"prettier": "^3.5.3",
@@ -20,6 +23,7 @@
 	"packageManager": "bun@1.2.6",
 	"workspaces": ["apps/*", "packages/*", "scripts"],
 	"dependencies": {
-		"@mantine/hooks": "^7.17.3"
+		"@mantine/hooks": "^7.17.3",
+		"@next/env": "^15.2.4"
 	}
 }

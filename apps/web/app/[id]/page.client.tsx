@@ -66,6 +66,12 @@ export function Playground({
 	const handleSubmit = async (data: any) => {
 		if (!selectedEndpoint) return;
 
+		// Check if API is enabled before making request
+		if (!config.enabled) {
+			toast.error("This API is currently disabled");
+			return;
+		}
+
 		const apiConfig = config.api[selectedEndpoint];
 		const contentType = apiConfig.input.type ?? "json"; // Default to JSON if not specified
 		const formData = new FormData();
@@ -191,20 +197,47 @@ export function Playground({
 	});
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-			<div>
+		<main className="flex flex-col gap-4">
+			{!config.enabled && (
+				<div className="bg-yellow-50 border-l-4 border-l-yellow-400 border border-yellow-200 p-4">
+					<div className="flex items-center gap-2">
+						<div className="flex-shrink-0">
+							<svg
+								className="size-5 text-yellow-400"
+								viewBox="0 0 20 20"
+								fill="currentColor"
+								role="img"
+								aria-hidden="true"
+							>
+								<title>Warning</title>
+								<path
+									fillRule="evenodd"
+									d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+									clipRule="evenodd"
+								/>
+							</svg>
+						</div>
+						<div>
+							<p className="text-sm text-yellow-700">
+								The {config.name} API is currently disabled. The playground is
+								available for reference, but API requests will not work.
+							</p>
+						</div>
+					</div>
+				</div>
+			)}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 				<Inputs
 					inputs={inputFields}
 					handleSubmit={handleSubmit}
 					endpoint={selectedEndpoint}
 					setEndpoint={setSelectedEndpoint}
 					endpoints={endpoints}
+					isApiEnabled={config.enabled}
 				/>
-			</div>
-			<div className="col-span-1 max-w-full">
 				<Output output={response} config={outputFields} />
 			</div>
-		</div>
+		</main>
 	);
 }
 
@@ -214,12 +247,14 @@ export function Inputs({
 	endpoint,
 	setEndpoint,
 	endpoints,
+	isApiEnabled = true,
 }: Readonly<{
 	inputs: InputField[];
 	handleSubmit?: (data: any) => Promise<any>;
 	endpoint: ApiPath;
 	setEndpoint: (endpoint: ApiPath) => void;
 	endpoints: ApiPath[];
+	isApiEnabled?: boolean;
 }>) {
 	const [canBlur, setCanBlur] = useState<string[]>([]);
 	const [isBlurred, setIsBlurred] = useState(false);
@@ -337,7 +372,7 @@ export function Inputs({
 									{input.description && (
 										<Description>{input.description}</Description>
 									)}
-									<div className="p-2 rounded-lg border bg-white my-2">
+									<div className="p-2 rounded-lg border border-neutral-200 bg-white my-2">
 										<div ref={imageRef}>
 											{inputForm[input.id]?.fileUrl && (
 												<Image
@@ -426,10 +461,15 @@ export function Inputs({
 						<div className="flex flex-col md:flex-row gap-4 md:items-center">
 							<Button
 								type="submit"
-								disabled={isLoading}
+								disabled={isLoading || !isApiEnabled}
 								className="w-full md:w-auto"
+								title={!isApiEnabled ? "API is disabled" : undefined}
 							>
-								{isLoading ? "Pending..." : "Make API Request"}
+								{isLoading
+									? "Pending..."
+									: !isApiEnabled
+										? "API Disabled"
+										: "Make API Request"}
 							</Button>
 							{responseTime && <Text>Time Taken: {responseTime}s</Text>}
 						</div>
@@ -478,11 +518,11 @@ export function Output({
 	}, []);
 
 	return (
-		<div className="flex flex-col gap-2 col-span-1 max-w-full overflow-x-hidden">
+		<div className="flex flex-col gap-2 col-span-1 overflow-x-hidden">
 			<Fieldset>
 				<Legend>Outputs</Legend>
 				<Text>The response from the API.</Text>
-				<FieldGroup className="max-w-full">
+				<FieldGroup>
 					{config?.map((configOutput: OutputField) => {
 						const id = configOutput.id;
 						const type = configOutput.type;
@@ -524,7 +564,7 @@ export function Output({
 									{configOutput.description && (
 										<Description>{configOutput.description}</Description>
 									)}
-									<div className="p-2 rounded-lg border bg-white my-2">
+									<div className="p-2 rounded-lg border border-neutral-200 bg-white my-2">
 										<div
 											ref={canBlur?.includes(id) ? outputImageRef : undefined}
 										>
@@ -573,7 +613,7 @@ export function Output({
 										<Description>{configOutput.description}</Description>
 									)}
 
-									<div className="p-2 rounded-lg border bg-white my-2">
+									<div className="p-2 rounded-lg border border-neutral-200 bg-white my-2">
 										<div
 											ref={canBlur?.includes(id) ? outputImageRef : undefined}
 										>

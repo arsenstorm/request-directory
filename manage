@@ -1,0 +1,506 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+ENV_FILE="$SCRIPT_DIR/.env"
+DOCKER_NETWORK="request-dir-network"
+
+# Fixed web service properties
+WEB_SERVICE="web"
+WEB_PORT=3000
+
+# Color output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Check if .env exists
+if [ ! -f "$ENV_FILE" ]; then
+  echo -e "${RED}Error: .env file not found in $SCRIPT_DIR${NC}"
+  exit 1
+fi
+
+# Load environment variables
+source "$ENV_FILE"
+
+# Discover services by scanning packages directory
+discover_services() {
+  local services=("$WEB_SERVICE")
+  
+  # Find all config.json files in packages directory
+  local config_files=$(find "$SCRIPT_DIR/packages" -name "config.json" 2>/dev/null)
+  
+  for config_file in $config_files; do
+    local service_dir=$(dirname "$config_file")
+    
+    # Extract service name from config.json instead of using directory name
+    if [ -f "$config_file" ]; then
+      # Try to get service name from config file
+      local service_name=$(grep -o '"service": *"[^"]*"' "$config_file" | cut -d'"' -f4)
+      
+      # If service name not found in config, fall back to slug
+      if [ -z "$service_name" ]; then
+        service_name=$(grep -o '"slug": *"[^"]*"' "$config_file" | cut -d'"' -f4)
+      fi
+      
+      # If neither is found, use directory name as last resort
+      if [ -z "$service_name" ]; then
+        service_name=$(basename "$service_dir")
+      fi
+      
+      # Only add if it's a valid service directory (has a Dockerfile)
+      if [ -n "$service_name" ] && [ -f "$service_dir/Dockerfile" ]; then
+        services+=("$service_name")
+      fi
+    fi
+  done
+  
+  echo "${services[*]}"
+}
+
+# Get available services
+SERVICES=($(discover_services))
+
+# Helper functions
+show_help() {
+  echo -e "${BLUE}Request Directory Container Manager${NC}"
+  echo
+  echo -e "Usage: $0 ${GREEN}COMMAND${NC}"
+  echo
+  echo -e "Commands:"
+  echo -e "  ${GREEN}setup${NC}              Configure environment variables"
+  echo -e "  ${GREEN}start${NC} [service]    Start all containers or specific service"
+  echo -e "                     Services: ${SERVICES[*]}, all"
+  echo -e "  ${GREEN}stop${NC} [service]     Stop all containers or specific service"
+  echo -e "  ${GREEN}logs${NC} [service]     Show logs for all containers or specific service"
+  echo -e "  ${GREEN}status${NC}             Show status of all containers"
+  echo -e "  ${GREEN}network${NC}            Create or recreate Docker network"
+  echo -e "  ${GREEN}help${NC}               Show this help message"
+  echo
+}
+
+setup_env() {
+  echo -e "${BLUE}Setting up environment variables...${NC}"
+  
+  # Backup current .env if it exists
+  if [ -f "$ENV_FILE" ]; then
+    cp "$ENV_FILE" "$ENV_FILE.backup"
+    echo -e "${YELLOW}Backed up existing .env to .env.backup${NC}"
+  fi
+  
+  # Setup services
+  for service in "${SERVICES[@]}"; do
+    if [ "$service" != "$WEB_SERVICE" ]; then
+      # Convert service name to uppercase for env var using tr
+      local env_var=$(echo "${service}" | tr 'a-z' 'A-Z')"_ENABLED"
+      # Replace dashes with underscores in the env var name
+      env_var=$(echo "$env_var" | tr '-' '_')
+      
+      # Use eval to get current value safely
+      local current_value=""
+      eval "current_value=\"\${$env_var:-false}\""
+      
+      read -p "Enable ${service} API? (y/n, default: ${current_value}): " service_enabled
+      service_enabled=${service_enabled:-${current_value}}
+      
+      # Convert y/n to true/false
+      [ "$service_enabled" = "y" ] && service_enabled="true" || service_enabled="false"
+      
+      # Update the .env file with new values
+      if grep -q "${env_var}=" "$ENV_FILE"; then
+        sed -i.bak "s/${env_var}=.*/${env_var}=$service_enabled/" "$ENV_FILE"
+      else
+        # Add variable if it doesn't exist
+        echo "${env_var}=$service_enabled" >> "$ENV_FILE"
+      fi
+    fi
+  done
+  
+  rm -f "$ENV_FILE.bak"
+  
+  echo -e "${GREEN}Environment variables updated successfully!${NC}"
+}
+
+# Create Docker network if it doesn't exist
+ensure_network() {
+  if ! docker network ls | grep -q "$DOCKER_NETWORK"; then
+    echo -e "${BLUE}Creating Docker network: $DOCKER_NETWORK...${NC}"
+    docker network create "$DOCKER_NETWORK" || {
+      echo -e "${RED}Failed to create network: $DOCKER_NETWORK${NC}"
+      exit 1
+    }
+  fi
+}
+
+# Get service directory path
+get_service_dir() {
+  local service=$1
+  
+  if [ "$service" = "$WEB_SERVICE" ]; then
+    echo "$SCRIPT_DIR/apps/web"
+  else
+    # Find the correct directory by looking for config files that mention this service
+    local service_dir=""
+    local config_files=$(find "$SCRIPT_DIR/packages" -name "config.json" 2>/dev/null)
+    
+    for config_file in $config_files; do
+      local dir=$(dirname "$config_file")
+      # Check if this config has our service name or slug
+      if grep -q "\"service\": *\"$service\"" "$config_file" || grep -q "\"slug\": *\"$service\"" "$config_file"; then
+        service_dir="$dir"
+        break
+      fi
+    done
+    
+    # If not found, try directory with the same name as a fallback
+    if [ -z "$service_dir" ] && [ -d "$SCRIPT_DIR/packages/$service" ]; then
+      service_dir="$SCRIPT_DIR/packages/$service"
+    fi
+    
+    echo "$service_dir"
+  fi
+}
+
+# Get container name for a service
+get_container_name() {
+  local service=$1
+  local container_name="request-dir-$service"
+  
+  # Try to get slug from config if it exists
+  if [ "$service" != "$WEB_SERVICE" ]; then
+    local service_dir=$(get_service_dir "$service")
+    if [ -n "$service_dir" ]; then
+      local config_file="$service_dir/config.json"
+      if [ -f "$config_file" ]; then
+        local slug=$(grep -o '"slug": *"[^"]*"' "$config_file" | cut -d'"' -f4)
+        [ -n "$slug" ] && container_name="request-dir-${slug}"
+      fi
+    fi
+  fi
+  
+  echo "$container_name"
+}
+
+# Get service port from config.json
+get_service_port() {
+  local service=$1
+  local port=""
+  
+  if [ "$service" = "$WEB_SERVICE" ]; then
+    port=$WEB_PORT
+  else
+    local service_dir=$(get_service_dir "$service")
+    if [ -n "$service_dir" ]; then
+      local config_file="$service_dir/config.json"
+      if [ -f "$config_file" ]; then
+        port=$(grep -o '"port": *[0-9]*' "$config_file" | cut -d':' -f2 | tr -d ' ')
+      fi
+    fi
+  fi
+  
+  echo "$port"
+}
+
+# Validate if a service exists
+validate_service() {
+  local service=$1
+  for s in "${SERVICES[@]}"; do
+    if [ "$s" = "$service" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+start_container() {
+  local service=$1
+  
+  # Validate service
+  if ! validate_service "$service"; then
+    echo -e "${RED}Unknown service: $service${NC}"
+    return 1
+  fi
+  
+  local container_name=$(get_container_name "$service")
+  local dockerfile_path=""
+  local build_context=""
+  
+  if [ "$service" = "$WEB_SERVICE" ]; then
+    dockerfile_path="$SCRIPT_DIR/apps/web/Dockerfile"
+    build_context="$SCRIPT_DIR"  # Web app needs to be built from root context
+  else
+    local service_dir=$(get_service_dir "$service")
+    if [ -z "$service_dir" ]; then
+      echo -e "${RED}Could not find directory for service $service${NC}"
+      return 1
+    fi
+    
+    dockerfile_path="$service_dir/Dockerfile"
+    build_context="$service_dir"
+  fi
+  
+  echo -e "${BLUE}Starting $service container as $container_name...${NC}"
+  
+  # Ensure Docker network exists
+  ensure_network
+  
+  # Check if container already exists
+  if docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
+    echo -e "${YELLOW}Container $container_name already exists. Starting if not running...${NC}"
+    docker start "$container_name" > /dev/null 2>&1 || true
+  else
+    echo -e "${BLUE}Building and starting $container_name...${NC}"
+    
+    # Build the container from Dockerfile
+    docker build -t "$container_name" -f "$dockerfile_path" "$build_context" || {
+      echo -e "${RED}Failed to build $container_name${NC}"
+      return 1
+    }
+    
+    # Set port mapping
+    local port=$(get_service_port "$service")
+    local port_mapping=""
+    if [ -n "$port" ]; then
+      port_mapping="-p ${port}:${port}"
+    fi
+    
+    # Get service slug for host entries
+    local host_entries=""
+    local slug=${container_name#request-dir-}
+    if [ "$slug" != "$service" ]; then
+      host_entries="--add-host=${slug}:127.0.0.1"
+    fi
+    
+    docker run -d --name "$container_name" --network "$DOCKER_NETWORK" \
+      --network-alias "${container_name}" \
+      $([ -n "$slug" ] && echo "--network-alias ${slug}") \
+      --add-host=host.docker.internal:host-gateway \
+      $host_entries \
+      $port_mapping --env-file "$ENV_FILE" "$container_name" || {
+      echo -e "${RED}Failed to start $container_name${NC}"
+      return 1
+    }
+  fi
+  
+  echo -e "${GREEN}$service container started successfully!${NC}"
+}
+
+start_all() {
+  # Source the environment file to check which services are enabled
+  source "$ENV_FILE"
+  
+  # Ensure Docker network exists
+  ensure_network
+  
+  # Always start the web container
+  start_container "$WEB_SERVICE"
+  
+  # Start other containers based on environment variables
+  for service in "${SERVICES[@]}"; do
+    if [ "$service" != "$WEB_SERVICE" ]; then
+      # Convert service name to uppercase for env var using tr
+      local env_var=$(echo "${service}" | tr 'a-z' 'A-Z')"_ENABLED"
+      # Replace dashes with underscores in the env var name
+      env_var=$(echo "$env_var" | tr '-' '_')
+      
+      # Use eval to check the value of dynamic variable
+      if eval "[ \"\${$env_var}\" = \"true\" ]"; then
+        start_container "$service"
+      fi
+    fi
+  done
+  
+  echo -e "${GREEN}All enabled containers started successfully!${NC}"
+}
+
+stop_container() {
+  local service=$1
+  
+  # Validate service
+  if ! validate_service "$service"; then
+    echo -e "${RED}Unknown service: $service${NC}"
+    return 1
+  fi
+  
+  local container_name=$(get_container_name "$service")
+  
+  echo -e "${BLUE}Stopping $service container ($container_name)...${NC}"
+  
+  if docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
+    docker stop "$container_name" > /dev/null 2>&1 && docker rm "$container_name" > /dev/null 2>&1 || {
+      echo -e "${RED}Failed to stop and remove $container_name${NC}"
+      return 1
+    }
+    echo -e "${GREEN}$service container stopped and removed!${NC}"
+  else
+    echo -e "${YELLOW}Container $container_name does not exist${NC}"
+  fi
+}
+
+stop_all() {
+  for service in "${SERVICES[@]}"; do
+    stop_container "$service"
+  done
+  
+  echo -e "${GREEN}All containers stopped!${NC}"
+}
+
+show_logs() {
+  local service=$1
+  
+  # Validate service
+  if ! validate_service "$service"; then
+    echo -e "${RED}Unknown service: $service${NC}"
+    return 1
+  fi
+  
+  local container_name=$(get_container_name "$service")
+  
+  echo -e "${BLUE}Showing logs for $service container ($container_name)...${NC}"
+  
+  if docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
+    docker logs -f "$container_name"
+  else
+    echo -e "${YELLOW}Container $container_name does not exist${NC}"
+  fi
+}
+
+show_all_logs() {
+  echo -e "${BLUE}Showing logs for all containers (Ctrl+C to exit)...${NC}"
+  
+  docker logs -f $(docker ps -a --format '{{.Names}}' | grep "^request-dir-" | paste -sd " ") 2>/dev/null || {
+    echo -e "${YELLOW}No running containers found${NC}"
+  }
+}
+
+show_status() {
+  # Source environment variables to check enabled status
+  source "$ENV_FILE"
+  
+  echo -e "${BLUE}Service Status:${NC}"
+  echo "------------------------------------------------------------------------------"
+  printf "%-20s %-10s %-10s %-10s %-15s\n" "SERVICE" "ENABLED" "RUNNING" "PORT" "CONTAINER"
+  echo "------------------------------------------------------------------------------"
+  
+  # Create a temporary file for sorting
+  local tmp_file=$(mktemp)
+  
+  # Collect service information for sorting
+  for service in "${SERVICES[@]}"; do
+    local container_name=$(get_container_name "$service")
+    local port=$(get_service_port "$service")
+    local running="No"
+    local enabled="--"
+    local sort_key="2" # Default sort key for not running
+    
+    # Check if container is running
+    if docker ps --format '{{.Names}}' | grep -q "^$container_name$"; then
+      running="Yes"
+      sort_key="0" # Running containers first
+    elif docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
+      running="Stopped"
+      sort_key="1" # Stopped containers second
+    fi
+    
+    # Check if service is enabled in environment variables
+    if [ "$service" = "$WEB_SERVICE" ]; then
+      enabled="Always"
+    else
+      # Convert service name to uppercase for env var using tr
+      local env_var=$(echo "${service}" | tr 'a-z' 'A-Z')"_ENABLED"
+      # Replace dashes with underscores in the env var name
+      env_var=$(echo "$env_var" | tr '-' '_')
+      
+      # Use eval to check the value of dynamic variable
+      if eval "[ \"\${$env_var}\" = \"true\" ]"; then
+        enabled="Yes"
+      else
+        enabled="No"
+      fi
+    fi
+    
+    # Add padding zeros for proper numeric sorting
+    local sort_port=$(printf "%05d" "${port:-0}")
+    
+    # Write to temp file with sort keys
+    echo "${sort_key}:${sort_port}:${service}:${enabled}:${running}:${port:---}:${container_name}" >> "$tmp_file"
+  done
+  
+  # Sort by running status (first key) and then by port (second key)
+  sort "$tmp_file" | while IFS=: read -r _ _ service enabled running port container_name; do
+    printf "%-20s %-10s %-10s %-10s %-15s\n" "$service" "$enabled" "$running" "$port" "$container_name"
+  done
+  
+  # Remove temporary file
+  rm -f "$tmp_file"
+  
+  echo "------------------------------------------------------------------------------"
+  echo -e "${YELLOW}Note: 'ENABLED' shows status from environment variables in .env${NC}"
+  echo -e "${YELLOW}      'RUNNING' shows current Docker container status${NC}"
+}
+
+# Create or recreate the Docker network
+create_network() {
+  echo -e "${BLUE}Creating/recreating Docker network: $DOCKER_NETWORK...${NC}"
+  
+  # Remove network if it exists
+  if docker network ls | grep -q "$DOCKER_NETWORK"; then
+    echo -e "${YELLOW}Removing existing network...${NC}"
+    docker network rm "$DOCKER_NETWORK" > /dev/null 2>&1 || {
+      echo -e "${RED}Failed to remove existing network${NC}"
+      return 1
+    }
+  fi
+  
+  # Create network
+  docker network create "$DOCKER_NETWORK" || {
+    echo -e "${RED}Failed to create network: $DOCKER_NETWORK${NC}"
+    return 1
+  }
+  
+  echo -e "${GREEN}Docker network $DOCKER_NETWORK created successfully!${NC}"
+}
+
+# Main execution
+case "$1" in
+  setup)
+    setup_env
+    ;;
+  start)
+    if [ "$2" = "all" ] || [ -z "$2" ]; then
+      start_all
+    else
+      start_container "$2"
+    fi
+    ;;
+  stop)
+    if [ "$2" = "all" ] || [ -z "$2" ]; then
+      stop_all
+    else
+      stop_container "$2"
+    fi
+    ;;
+  logs)
+    if [ "$2" = "all" ] || [ -z "$2" ]; then
+      show_all_logs
+    else
+      show_logs "$2"
+    fi
+    ;;
+  status)
+    show_status
+    ;;
+  network)
+    create_network
+    ;;
+  help|--help|-h)
+    show_help
+    ;;
+  *)
+    show_help
+    exit 1
+    ;;
+esac 

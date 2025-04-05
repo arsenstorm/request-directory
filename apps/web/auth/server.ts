@@ -2,20 +2,18 @@ import { betterAuth } from "better-auth";
 import { apiKey } from "better-auth/plugins";
 
 import { Pool } from "pg";
-import dotenv from "dotenv";
 
 import { polar } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
+import { env } from "@/utils/env/get";
 
 const client = new Polar({
-	accessToken: process.env.POLAR_ACCESS_TOKEN,
+	accessToken: env("POLAR_ACCESS_TOKEN"),
 	// Use 'sandbox' if you're using the Polar Sandbox environment
 	// Remember that access tokens, products, etc. are completely separated between environments.
 	// Access tokens obtained in Production are for instance not usable in the Sandbox environment.
-	server: "sandbox",
+	server: env("NODE_ENV") === "production" ? "production" : "sandbox",
 });
-
-dotenv.config();
 
 export const auth = betterAuth({
 	appName: "Request Directory",
@@ -23,9 +21,9 @@ export const auth = betterAuth({
 		cookiePrefix: "requests",
 	},
 	database: new Pool({
-		connectionString: process.env.DATABASE_URL,
+		connectionString: env("DATABASE_URL"),
 	}),
-	secret: process.env.BETTER_AUTH_SECRET,
+	secret: env("BETTER_AUTH_SECRET"),
 	emailAndPassword: {
 		enabled: false,
 	},
@@ -47,8 +45,8 @@ export const auth = betterAuth({
 	},
 	socialProviders: {
 		github: {
-			clientId: process.env.GITHUB_CLIENT_ID as string,
-			clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+			clientId: env("GITHUB_CLIENT_ID") as string,
+			clientSecret: env("GITHUB_CLIENT_SECRET") as string,
 		},
 	},
 	plugins: [
@@ -74,7 +72,7 @@ export const auth = betterAuth({
 			},
 			// Incoming Webhooks handler will be installed at /polar/webhooks
 			webhooks: {
-				secret: process.env.POLAR_WEBHOOK_SECRET as string,
+				secret: env("POLAR_WEBHOOK_SECRET") as string,
 				onPayload: async (payload) => {
 					console.log(payload);
 				},
@@ -82,7 +80,7 @@ export const auth = betterAuth({
 		}),
 	],
 	trustedOrigins: [
-		...(process.env.NODE_ENV === "production"
+		...(env("NODE_ENV") === "production"
 			? ["https://request.directory"]
 			: ["http://localhost:3000", "https://localhost:3000"]),
 	],

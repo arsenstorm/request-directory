@@ -96,7 +96,7 @@ function MobileNav({
 					)}
 				</motion.div>
 			</div>
-			<div className="absolute left-1/2 w-screen -translate-x-1/2">
+			<div className="absolute left-1/2 w-[calc(100dvw)] -translate-x-1/2">
 				<div className="absolute inset-x-0 top-0 border-t border-black/5" />
 				<div className="absolute inset-x-0 top-2 border-t border-black/5" />
 			</div>

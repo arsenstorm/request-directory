@@ -1,6 +1,10 @@
+import { env } from "@/utils/env/get";
 import { authorise } from "@/auth/authorise";
 import { type ApiPath, getConfig } from "@/utils/get-config";
 import { after, type NextRequest, NextResponse } from "next/server";
+
+// Node
+import { Readable } from "node:stream";
 
 const handleRequest = async (
 	request: NextRequest,
@@ -26,9 +30,9 @@ const handleRequest = async (
 		);
 	}
 
-	const configFiles = await getConfig();
-
-	const config = configFiles.find((config) => config.slug === id);
+	const config = await getConfig({ type: "api" }).then((configs) =>
+		configs.find((config) => config.slug === id)
+	);
 
 	if (!config) {
 		return NextResponse.json(
@@ -39,6 +43,20 @@ const handleRequest = async (
 			{
 				status: 400,
 			},
+		);
+	}
+
+	const enabled = env(
+		`${config.slug.toUpperCase().replace(/-/g, "_")}_ENABLED`,
+		{
+			default: "false",
+		},
+	);
+
+	if (enabled !== "true") {
+		return NextResponse.json(
+			{ error: "Provider is disabled." },
+			{ status: 400 },
 		);
 	}
 
@@ -63,47 +81,28 @@ const handleRequest = async (
 		);
 	}
 
-	const { input } = requestConfig;
+	const hostname = env("DOCKER_ENV", {
+			default: "false",
+		}) === "true"
+		? `${id}`
+		: "localhost";
 
-	const { type, parameters } = input;
-
-	let body: any;
-
-	switch (type) {
-		case "formdata":
-			body = await request.formData();
-			break;
-		case "json":
-			body = await request.json();
-			break;
-		default:
-			body = await request.text();
-			break;
-	}
-
-	for (const [key, value] of Object.entries(parameters)) {
-		if (value.required && (type === "formdata" ? !body.has(key) : !body[key])) {
-			return NextResponse.json(
-				{
-					error: `Missing required parameter: ${key}`,
-				},
-				{
-					status: 400,
-				},
-			);
-		}
-	}
-
-	const url = new URL(`http://localhost:${port}/${all.join("/")}`);
+	const url = new URL(`http://${hostname}:${port}/${all.join("/")}`);
 
 	try {
+		const headers = new Headers();
+		for (const [key, value] of request.headers.entries()) {
+			headers.set(key, value);
+		}
+
+		const body = Readable.fromWeb(request.body as any);
+
 		const response = await fetch(url, {
 			method: request.method,
-			headers: {
-				...request.headers,
-				...(type === "json" ? { "Content-Type": "application/json" } : {}),
-			},
-			body: type === "json" ? JSON.stringify(body) : body,
+			headers: request.headers,
+			// @ts-expect-error: add the body stream
+			body,
+			duplex: "half",
 		});
 
 		const responseBody = await response.json();
@@ -129,6 +128,7 @@ const handleRequest = async (
 
 		return NextResponse.json(parsedResponse);
 	} catch (error) {
+		console.error(error);
 		return NextResponse.json(
 			{
 				error: "Internal server error.",

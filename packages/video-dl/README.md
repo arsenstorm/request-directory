@@ -14,10 +14,10 @@ uv run src/main.py
 
 ## Usage
 
-By default, the API runs on port 7005.
+By default, the API runs on port 7004.
 
 ```bash
-docker run -it -p7005:7005 ghcr.io/arsenstorm/video-dl:latest
+docker run -it -p7004:7004 ghcr.io/arsenstorm/video-dl:latest
 ```
 
 ## API
@@ -34,7 +34,7 @@ To use the API, you need to send a POST request containing JSON data to the
 As an example, we’ll use the following URL:
 
 ```bash
-curl -X POST http://localhost:7005/download -H "Content-Type: application/json" -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "format": "medium"}'
+curl -X POST http://localhost:7004/download -H "Content-Type: application/json" -d '{"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "format": "medium"}'
 ```
 
 #### Example Response
